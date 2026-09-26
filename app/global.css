@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 40 20% 96%;
+  --foreground: 222 47% 11%;
+  --muted: 220 14% 90%;
+  --muted-foreground: 220 10% 40%;
+  --popover: 40 20% 96%;
+  --popover-foreground: 222 47% 11%;
+  --card: 40 20% 96%;
+  --card-foreground: 222 47% 11%;
+  --border: 220 13% 82%;
+  --input: 220 13% 82%;
+  --primary: 222 47% 20%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 220 14% 90%;
+  --secondary-foreground: 222 47% 11%;
+  --accent: 45 80% 50%;
+  --accent-foreground: 222 47% 11%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 210 40% 98%;
+  --ring: 222 47% 20%;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: 222 47% 11%;
+  --foreground: 210 40% 98%;
+  --muted: 220 14% 18%;
+  --muted-foreground: 220 10% 60%;
+  --popover: 222 47% 11%;
+  --popover-foreground: 210 40% 98%;
+  --card: 222 47% 11%;
+  --card-foreground: 210 40% 98%;
+  --border: 220 13% 25%;
+  --input: 220 13% 25%;
+  --primary: 210 40% 98%;
+  --primary-foreground: 222 47% 11%;
+  --secondary: 220 14% 18%;
+  --secondary-foreground: 210 40% 98%;
+  --accent: 45 80% 50%;
+  --accent-foreground: 222 47% 11%;
+  --destructive: 0 62% 50%;
+  --destructive-foreground: 210 40% 98%;
+  --ring: 210 40% 98%;
+}
+
+body {
+  font-family: Inter, system-ui, sans-serif;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+.prose-bible {
+  font-family: Merriweather, Georgia, serif;
+  line-height: 1.8;
+}
