@@ -60,7 +60,9 @@ export default function SermonsPage() {
       {error && <p className="text-destructive">{error}</p>}
       {loading && <p className="text-muted-foreground">Loading...</p>}
       {!loading && sermons.length === 0 && (
-        <p className="text-muted-foreground">No sermons yet. Click "New Sermon" to create one.</p>
+        <p className="text-muted-foreground">
+          No sermons yet. Click &quot;New Sermon&quot; to create one.
+        </p>
       )}
       {!loading && sermons.length > 0 && (
         <div className="space-y-3">
