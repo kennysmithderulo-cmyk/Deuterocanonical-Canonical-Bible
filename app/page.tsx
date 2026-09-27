@@ -23,7 +23,7 @@ export default async function Home() {
           <p className="text-sm text-muted-foreground">Your last passage will appear here after Phase 2.</p>
         </div>
         <div className="rounded-lg border bg-card p-4">
-          <h2 className="font-semibold mb-2">Today's Scripture</h2>
+          <h2 className="font-semibold mb-2">Today&apos;s Scripture</h2>
           <p className="text-sm text-muted-foreground">Daily study card coming in Phase 2.</p>
         </div>
         <div className="rounded-lg border bg-card p-4">
