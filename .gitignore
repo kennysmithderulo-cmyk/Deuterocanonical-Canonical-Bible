@@ -34,3 +34,6 @@ next-env.d.ts
 
 # Supabase CLI (if used)
 .supabase/wrappers
+
+.env
+.env*.local
