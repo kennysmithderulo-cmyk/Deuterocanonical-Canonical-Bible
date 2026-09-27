@@ -46,17 +46,17 @@ export default async function Home() {
       <section className="mt-8 flex gap-3">
         {!user ? (
           <>
-            <Button asChild>
-              <Link href="/auth/sign-in">Sign In</Link>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/auth/sign-up">Create Account</Link>
-            </Button>
+            <Link href="/auth/sign-in">
+              <Button>Sign In</Button>
+            </Link>
+            <Link href="/auth/sign-up">
+              <Button variant="outline">Create Account</Button>
+            </Link>
           </>
         ) : (
-          <Button variant="secondary" asChild>
-            <Link href="/bible">Open Bible</Link>
-          </Button>
+          <Link href="/bible">
+            <Button variant="secondary">Open Bible</Button>
+          </Link>
         )}
       </section>
     </div>
