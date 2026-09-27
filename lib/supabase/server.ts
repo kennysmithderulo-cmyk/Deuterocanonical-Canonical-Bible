@@ -12,7 +12,21 @@ export async function getServerClient() {
         getAll() {
           return cookieStore.getAll();
         },
-        setAll(cookiesToSet) {
+        setAll(
+          cookiesToSet: Array<{
+            name: string;
+            value: string;
+            options?: {
+              path?: string;
+              httpOnly?: boolean;
+              sameSite?: "lax" | "strict" | "none";
+              secure?: boolean;
+              maxAge?: number;
+              domain?: string;
+              expires?: Date;
+            };
+          }>
+        ) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options)
