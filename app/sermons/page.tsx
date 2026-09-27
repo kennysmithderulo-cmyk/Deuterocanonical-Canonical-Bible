@@ -54,10 +54,10 @@ export default function SermonsPage() {
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-3xl font-bold">Sermons</h1>
         <Button onClick={createSermon}>
-  <Plus className="h-4 w-4 mr-2" /> {"New Sermon"}
-</Button>
+          <Plus className="h-4 w-4 mr-2" /> {"New Sermon"}
+        </Button>
       </div>
-      {error && <p className="text-destructiv>{error}</p>}
+      {error && <p className="text-destructive">{error}</p>}
       {loading && <p className="text-muted-foreground">Loading...</p>}
       {!loading && sermons.length === 0 && (
         <p className="text-muted-foreground">No sermons yet. Click "New Sermon" to create one.</p>
