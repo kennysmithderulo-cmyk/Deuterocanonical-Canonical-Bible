@@ -1,23 +1,24 @@
 "use client";
 
-import Link from "next/link";
-import { FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function SignUpPage() {
-  const router = useRouter();
-  const supabase = createClient();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  const supabase = createClient();
+
+  const handleSignUp = async (event: React.FormEvent) => {
     event.preventDefault();
     setLoading(true);
-    setMessage("");
+    setError(null);
+    setMessage(null);
 
     const { error } = await supabase.auth.signUp({
       email,
@@ -27,78 +28,70 @@ export default function SignUpPage() {
       },
     });
 
-    setLoading(false);
-
     if (error) {
-      setMessage(error.message);
-      return;
+      setError(error.message);
+    } else {
+      setMessage(
+        "Account created. Check your email and confirm your account before signing in."
+      );
     }
 
-    setMessage(
-      "Account created. Check your email for a confirmation link before signing in."
-    );
-    router.refresh();
-  }
+    setLoading(false);
+  };
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-md items-center px-4 py-12">
-      <section className="w-full rounded-xl border border-border bg-card p-6 shadow-sm">
-        <h1 className="font-serif text-3xl font-bold text-card-foreground">
-          Create your account
-        </h1>
+    <div className="mx-auto mt-10 max-w-md rounded-lg border bg-card p-6">
+      <h1 className="mb-2 text-2xl font-bold">Create account</h1>
 
-        <p className="mt-2 text-sm text-muted-foreground">
-          Save notes, build studies, and continue reading across devices.
-        </p>
+      <p className="mb-4 text-sm text-muted-foreground">
+        Create an account to save study notes and access your preferences.
+      </p>
 
-        <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
-          <label className="block text-sm font-medium text-foreground">
-            Email
-            <input
-              className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-foreground outline-none ring-offset-background focus:ring-2 focus:ring-ring"
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              autoComplete="email"
-              required
-            />
-          </label>
+      <form onSubmit={handleSignUp} className="space-y-4">
+        <div>
+          <label className="mb-1 block text-sm">Email</label>
+          <input
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            autoComplete="email"
+            required
+          />
+        </div>
 
-          <label className="block text-sm font-medium text-foreground">
-            Password
-            <input
-              className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-foreground outline-none ring-offset-background focus:ring-2 focus:ring-ring"
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              autoComplete="new-password"
-              minLength={6}
-              required
-            />
-          </label>
+        <div>
+          <label className="mb-1 block text-sm">Password</label>
+          <input
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            type="password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            autoComplete="new-password"
+            minLength={6}
+            required
+          />
+        </div>
 
-          {message ? (
-            <p className="rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">
-              {message}
-            </p>
-          ) : null}
+        {error ? (
+          <p className="text-sm text-destructive">{error}</p>
+        ) : null}
 
-          <button
-            className="w-full rounded-md bg-primary px-4 py-2 font-medium text-primary-foreground disabled:cursor-not-allowed disabled:opacity-60"
-            type="submit"
-            disabled={loading}
-          >
-            {loading ? "Creating account…" : "Create account"}
-          </button>
-        </form>
+        {message ? (
+          <p className="text-sm text-muted-foreground">{message}</p>
+        ) : null}
 
-        <p className="mt-6 text-center text-sm text-muted-foreground">
+        <Button type="submit" disabled={loading} className="w-full">
+          {loading ? "Creating account..." : "Create account"}
+        </Button>
+
+        <p className="text-sm text-muted-foreground">
           Already have an account?{" "}
-          <Link className="font-medium text-primary hover:underline" href="/auth/sign-in">
+          <Link href="/auth/sign-in" className="text-primary underline">
             Sign in
           </Link>
         </p>
-      </section>
-    </main>
+      </form>
+    </div>
   );
 }
