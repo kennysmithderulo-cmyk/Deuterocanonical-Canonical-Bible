@@ -1,26 +1,40 @@
 import { NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { getServerClient } from "@/lib/supabase/server";
 
 export async function GET() {
-  const supabase = createAdminClient();
+  const supabase = await getServerClient();
 
-  const { data: books, error: eb } = await supabase
+  const { data: books, error: booksError } = await supabase
     .from("bible_books")
     .select("id,name,testament,book_order,chapters_count")
     .order("book_order")
     .limit(5);
 
-  const { data: translations, error: et } = await supabase
+  const { data: translations, error: translationsError } = await supabase
     .from("translations")
     .select("id,code,name")
-    .limit(5);
+    .order("code");
 
   return NextResponse.json({
-    books: books ?? null,
-    translations: translations ?? null,
+    books,
+    translations,
     errors: {
-      books: eb ? { message: eb.message, details: eb.details } : null,
-      translations: et ? { message: et.message, details: et.details } : null,
+      books: booksError
+        ? {
+            code: booksError.code,
+            message: booksError.message,
+            details: booksError.details,
+            hint: booksError.hint,
+          }
+        : null,
+      translations: translationsError
+        ? {
+            code: translationsError.code,
+            message: translationsError.message,
+            details: translationsError.details,
+            hint: translationsError.hint,
+          }
+        : null,
     },
   });
 }
