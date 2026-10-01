@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut, Menu, Moon, Sun, X } from "lucide-react";
+import { LogIn, LogOut, Menu, Moon, Sun, X } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
@@ -19,6 +19,36 @@ export function AppHeader({ onMenuToggle, menuOpen }: AppHeaderProps) {
 
   const [mounted, setMounted] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [isSignedIn, setIsSignedIn] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadSession() {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (active) {
+        setIsSignedIn(Boolean(session));
+      }
+    }
+
+    loadSession();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (active) {
+        setIsSignedIn(Boolean(session));
+      }
+    });
+
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
 
   useEffect(() => {
     setMounted(true);
@@ -37,8 +67,13 @@ export function AppHeader({ onMenuToggle, menuOpen }: AppHeaderProps) {
       return;
     }
 
+    setIsSignedIn(false);
     router.replace("/");
     router.refresh();
+  }
+
+  function handleSignIn() {
+    router.push("/auth/sign-in");
   }
 
   return (
@@ -79,17 +114,30 @@ export function AppHeader({ onMenuToggle, menuOpen }: AppHeaderProps) {
               )}
             </Button>
 
-            <Button
-              variant="outline"
-              size="sm"
-              type="button"
-              aria-label="Log out"
-              disabled={loggingOut}
-              onClick={handleLogout}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              {loggingOut ? "Logging out..." : "Log out"}
-            </Button>
+            {isSignedIn ? (
+              <Button
+                variant="outline"
+                size="sm"
+                type="button"
+                aria-label="Log out"
+                disabled={loggingOut}
+                onClick={handleLogout}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                {loggingOut ? "Logging out..." : "Log out"}
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                size="sm"
+                type="button"
+                aria-label="Sign in"
+                onClick={handleSignIn}
+              >
+                <LogIn className="mr-2 h-4 w-4" />
+                Sign in
+              </Button>
+            )}
           </div>
         ) : null}
       </div>
