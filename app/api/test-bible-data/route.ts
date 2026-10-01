@@ -1,17 +1,17 @@
 import { NextResponse } from "next/server";
-import { getServerClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function GET() {
-  const supabase = await getServerClient();
+  const supabase = createAdminClient();
 
   const { data: books, error: eb } = await supabase
-    .from("public.bible_books")
+    .from("bible_books")
     .select("id,name,testament,book_order,chapters_count")
     .order("book_order")
     .limit(5);
 
   const { data: translations, error: et } = await supabase
-    .from("public.translations")
+    .from("translations")
     .select("id,code,name")
     .limit(5);
 
