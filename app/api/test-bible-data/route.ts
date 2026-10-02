@@ -5,7 +5,7 @@ export async function GET() {
   const supabase = await getServerClient();
 
   const { data, error } = await supabase
-    .from("bible_data_view")
+    .from("bible_data")
     .select("data")
     .single();
 
@@ -24,4 +24,3 @@ export async function GET() {
 
   return NextResponse.json(result);
 }
-
