@@ -1,4 +1,4 @@
-8import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getServerClient } from "@/lib/supabase/server";
 
 export async function GET() {
@@ -21,3 +21,4 @@ export async function GET() {
   // data is already { books: [...], translations: [...] }
   return NextResponse.json(data as any);
 }
+
