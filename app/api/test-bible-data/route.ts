@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+8import { NextResponse } from "next/server";
 import { getServerClient } from "@/lib/supabase/server";
 
 export async function GET() {
