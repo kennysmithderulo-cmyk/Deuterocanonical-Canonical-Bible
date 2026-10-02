@@ -4,9 +4,9 @@ import { getServerClient } from "@/lib/supabase/server";
 export async function GET() {
   const supabase = await getServerClient();
 
-  // Call the SQL function via raw SQL to bypass schema cache
+  // Call the renamed SQL function to bypass schema cache
   const { data, error } = await supabase.query(`
-    SELECT public.get_bible_data() AS result;
+    SELECT public.get_bible_data_v2() AS result;
   `);
 
   if (error) {
@@ -20,9 +20,7 @@ export async function GET() {
     );
   }
 
-  // data is an array of rows; first row has { result: { books, translations } }
   const result = (data as any[])?.[0]?.result ?? { books: [], translations: [] };
 
   return NextResponse.json(result);
 }
-
