@@ -4,7 +4,10 @@ import { getServerClient } from "@/lib/supabase/server";
 export async function GET() {
   const supabase = await getServerClient();
 
-  const { data, error } = await supabase.rpc("get_bible_data_v2");
+  const { data, error } = await supabase
+    .from("bible_data_view")
+    .select("data")
+    .single();
 
   if (error) {
     return NextResponse.json(
@@ -17,7 +20,8 @@ export async function GET() {
     );
   }
 
-  // data is already { books: [...], translations: [...] }
-  return NextResponse.json(data as any);
+  const result = (data as any)?.data ?? { books: [], translations: [] };
+
+  return NextResponse.json(result);
 }
 
