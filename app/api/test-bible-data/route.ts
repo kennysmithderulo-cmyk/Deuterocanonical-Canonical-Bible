@@ -11,8 +11,7 @@ export async function GET() {
     );
   }
 
-  // Call the SQL function directly via PostgREST RPC
-  const url = `${supabaseUrl}/rest/v1/rpc/get_bible_data_v2`;
+  const url = `${supabaseUrl}/rest/v1/rpc/get_bible_data_v3`;
 
   const res = await fetch(url, {
     method: "POST",
@@ -37,7 +36,6 @@ export async function GET() {
   }
 
   const rows = await res.json();
-  // RPC returns an array; function returns jsonb
   const result = Array.isArray(rows) && rows.length > 0 ? rows[0] : { books: [], translations: [] };
 
   return NextResponse.json(result);
