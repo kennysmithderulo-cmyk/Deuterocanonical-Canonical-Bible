@@ -11,32 +11,33 @@ export async function GET() {
     );
   }
 
-  const url = `${supabaseUrl}/rest/v1/rpc/get_bible_data_v3`;
-
-  const res = await fetch(url, {
-    method: "POST",
-    headers: {
-      apikey: supabaseKey,
-      Authorization: `Bearer ${supabaseKey}`,
-      "Content-Type": "application/json",
-      Prefer: "return=representation",
-    },
-    body: JSON.stringify({}),
-  });
+  const res = await fetch(
+    `${supabaseUrl}/rest/v1/rpc/get_bible_data_v3`,
+    {
+      method: "POST",
+      headers: {
+        apikey: supabaseKey,
+        Authorization: `Bearer ${supabaseKey}`,
+        "Content-Type": "application/json",
+      },
+      body: "{}",
+      cache: "no-store",
+    }
+  );
 
   if (!res.ok) {
-    const text = await res.text();
+    const details = await res.text();
+
     return NextResponse.json(
       {
         error: `Supabase RPC error: ${res.status}`,
-        details: text,
+        details,
       },
       { status: res.status }
     );
   }
 
-  const rows = await res.json();
-  const result = Array.isArray(rows) && rows.length > 0 ? rows[0] : { books: [], translations: [] };
+  const data = await res.json();
 
-  return NextResponse.json(result);
+  return NextResponse.json(data);
 }
