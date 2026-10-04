@@ -1,4 +1,7 @@
-"use client";
+
+
+
+		"use client";
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
@@ -169,6 +172,11 @@ export default function BiblePage() {
   const chapter =
     book?.chapters.find((c) => c.chapter === selectedChapterNum) || null;
 
+  // Debug info
+  const debugInfo = chapter
+    ? `chapterId=${chapter.id}, bookId=${selectedBookId}, transId=${selectedTranslationId}`
+    : "no chapter";
+
   return (
     <div className="max-w-4xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Bible</h1>
@@ -239,19 +247,24 @@ export default function BiblePage() {
           <p className="text-sm text-muted-foreground">Loading passage...</p>
         )}
 
-        {!loadingVerses && verseTexts.length === 0 && (
-          <p className="text-sm text-muted-foreground">
-            No verse text available for this translation yet.
-          </p>
-        )}
+        {!loadingVerses && (
+          <>
+            <p className="text-xs text-muted-foreground mb-2">{debugInfo}</p>
 
-        {!loadingVerses &&
-          verseTexts.map((v) => (
-            <div key={v.verse_number} className="mb-2">
-              <span className="font-semibold text-sm mr-2">{v.verse_number}</span>
-              <span>{v.text_content}</span>
-            </div>
-          ))}
+            {verseTexts.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                No verse text available for this translation yet.
+              </p>
+            ) : (
+              verseTexts.map((v) => (
+                <div key={v.verse_number} className="mb-2">
+                  <span className="font-semibold text-sm mr-2">{v.verse_number}</span>
+                  <span>{v.text_content}</span>
+                </div>
+              ))
+            )}
+          </>
+        )}
       </div>
     </div>
   );
