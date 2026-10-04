@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 type Chapter = { id: number; book_id: number; chapter: number };
 type Book = {
@@ -24,7 +25,14 @@ type ApiResponse = {
   translations: Translation[];
 };
 
+type VerseText = {
+  verse_number: number;
+  text_content: string;
+};
+
 export default function BiblePage() {
+  const supabase = createClient();
+
   const [data, setData] = useState<ApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,6 +41,10 @@ export default function BiblePage() {
   const [selectedChapterNum, setSelectedChapterNum] = useState<number | null>(null);
   const [selectedTranslationId, setSelectedTranslationId] = useState<number | null>(null);
 
+  const [verseTexts, setVerseTexts] = useState<VerseText[]>([]);
+  const [loadingVerses, setLoadingVerses] = useState(false);
+
+  // Load structure from API
   useEffect(() => {
     (async () => {
       try {
@@ -61,6 +73,82 @@ export default function BiblePage() {
       }
     })();
   }, []);
+
+  // Load verse text when chapter/translation changes
+  useEffect(() => {
+    if (!selectedChapterNum || !selectedBookId || !selectedTranslationId || !data) {
+      setVerseTexts([]);
+      return;
+    }
+
+    setLoadingVerses(true);
+
+    (async () => {
+      try {
+        const book = data.books.find((b) => b.id === selectedBookId);
+        if (!book) {
+          setLoadingVerses(false);
+          return;
+        }
+
+        const chapter = book.chapters.find((c) => c.chapter === selectedChapterNum);
+        if (!chapter) {
+          setLoadingVerses(false);
+          return;
+        }
+
+        const chapterId = chapter.id;
+
+        // Get verse IDs for this chapter
+        const versesRes = await supabase
+          .from("verses")
+          .select("id, verse")
+          .eq("chapter_id", chapterId)
+          .order("verse");
+
+        const verses = versesRes.data || [];
+
+        if (verses.length === 0) {
+          setVerseTexts([]);
+          setLoadingVerses(false);
+          return;
+        }
+
+        const verseIds = verses.map((v: any) => v.id);
+        const verseNumMap = new Map<number, number>();
+        verses.forEach((v: any) => {
+          verseNumMap.set(Number(v.id), Number(v.verse));
+        });
+
+        // Get translation text for these verses
+        const tvRes = await supabase
+          .from("translation_verses")
+          .select("verse_id, text_content")
+          .eq("translation_id", selectedTranslationId)
+          .in("verse_id", verseIds);
+
+        const tvData = tvRes.data || [];
+
+        const merged: VerseText[] = tvData
+          .map((t: any) => {
+            const vid = Number(t.verse_id);
+            const vnum = verseNumMap.get(vid) ?? 0;
+            return {
+              verse_number: vnum,
+              text_content: t.text_content,
+            };
+          })
+          .sort((a, b) => a.verse_number - b.verse_number);
+
+        setVerseTexts(merged);
+      } catch (e) {
+        console.error(e);
+        setVerseTexts([]);
+      } finally {
+        setLoadingVerses(false);
+      }
+    })();
+  }, [selectedChapterNum, selectedBookId, selectedTranslationId, data]);
 
   if (loading) {
     return <div className="p-4">Loading Bible data...</div>;
@@ -147,19 +235,23 @@ export default function BiblePage() {
           {translation?.abbreviation} {translation?.name}
         </p>
 
-        {!chapter ? (
-          <p className="text-sm text-muted-foreground">No chapter selected.</p>
-        ) : (
-          <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">
-              This is a simple placeholder view using /api/test-bible-data.
-              Real verse text will be added next.
-            </p>
-            <p className="text-sm">
-              Showing: {book?.name} chapter {selectedChapterNum} (structure only).
-            </p>
-          </div>
+        {loadingVerses && (
+          <p className="text-sm text-muted-foreground">Loading passage...</p>
         )}
+
+        {!loadingVerses && verseTexts.length === 0 && (
+          <p className="text-sm text-muted-foreground">
+            No verse text available for this translation yet.
+          </p>
+        )}
+
+        {!loadingVerses &&
+          verseTexts.map((v) => (
+            <div key={v.verse_number} className="mb-2">
+              <span className="font-semibold text-sm mr-2">{v.verse_number}</span>
+              <span>{v.text_content}</span>
+            </div>
+          ))}
       </div>
     </div>
   );
