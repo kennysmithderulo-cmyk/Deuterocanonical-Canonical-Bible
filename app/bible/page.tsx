@@ -1,75 +1,166 @@
-useEffect(() => {
-  if (!selectedChapter || !selectedTranslation) {
-    console.log("BiblePage: missing selectedChapter or selectedTranslation", {
-      selectedChapter,
-      selectedTranslation,
-    });
-    return;
+"use client";
+
+import { useEffect, useState } from "react";
+
+type Chapter = { id: number; book_id: number; chapter: number };
+type Book = {
+  id: number;
+  name: string;
+  testament: string;
+  order: number;
+  chapters: Chapter[];
+};
+type Translation = {
+  id: number;
+  name: string;
+  abbreviation: string;
+  language: string;
+  year: number;
+  notes: string;
+};
+
+type ApiResponse = {
+  books: Book[];
+  translations: Translation[];
+};
+
+export default function BiblePage() {
+  const [data, setData] = useState<ApiResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const [selectedBookId, setSelectedBookId] = useState<number | null>(null);
+  const [selectedChapterNum, setSelectedChapterNum] = useState<number | null>(null);
+  const [selectedTranslationId, setSelectedTranslationId] = useState<number | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch("/api/test-bible-data");
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+        const json: ApiResponse = await res.json();
+        setData(json);
+
+        if (json.books && json.books.length > 0) {
+          setSelectedBookId(json.books[0].id);
+          const firstBook = json.books[0];
+          if (firstBook.chapters && firstBook.chapters.length > 0) {
+            setSelectedChapterNum(firstBook.chapters[0].chapter);
+          }
+        }
+
+        if (json.translations && json.translations.length > 0) {
+          setSelectedTranslationId(json.translations[0].id);
+        }
+      } catch (e: any) {
+        setError(e?.message || "Failed to load Bible data");
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  if (loading) {
+    return <div className="p-4">Loading Bible data...</div>;
   }
 
-  setLoading(true);
-  setError(null);
+  if (error || !data) {
+    return (
+      <div className="p-4 text-destructive">
+        {error || "No Bible data available"}
+      </div>
+    );
+  }
 
-  (async () => {
-    try {
-      console.log("BiblePage: loading verses for chapter", selectedChapter.id);
+  const book = data.books.find((b) => b.id === selectedBookId) || null;
+  const translation =
+    data.translations.find((t) => t.id === selectedTranslationId) || null;
 
-      const verseData = await supabase
-        .from("verses")
-        .select("id")
-        .eq("chapter_id", selectedChapter.id);
+  const chapter =
+    book?.chapters.find((c) => c.chapter === selectedChapterNum) || null;
 
-      console.log("BiblePage: verses query result", verseData);
+  return (
+    <div className="max-w-4xl mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Bible</h1>
 
-      const verseIds = (verseData.data || []).map((v: any) => v.id);
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div>
+          <label className="block text-sm mb-1">Book</label>
+          <select
+            className="w-full rounded border px-3 py-2 text-sm"
+            value={selectedBookId ?? ""}
+            onChange={(e) => {
+              const id = Number(e.target.value);
+              setSelectedBookId(id);
+              const b = data.books.find((x) => x.id === id) || null;
+              if (b?.chapters?.length) {
+                setSelectedChapterNum(b.chapters[0].chapter);
+              }
+            }}
+          >
+            {data.books.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.name}
+              </option>
+            ))}
+          </select>
+        </div>
 
-      if (verseIds.length === 0) {
-        console.log("BiblePage: no verses found for chapter", selectedChapter.id);
-        setTranslationVerses([]);
-        setLoading(false);
-        return;
-      }
+        <div>
+          <label className="block text-sm mb-1">Chapter</label>
+          <select
+            className="w-full rounded border px-3 py-2 text-sm"
+            value={selectedChapterNum ?? ""}
+            onChange={(e) => setSelectedChapterNum(Number(e.target.value))}
+          >
+            {book?.chapters.map((c) => (
+              <option key={c.id} value={c.chapter}>
+                {c.chapter}
+              </option>
+            ))}
+          </select>
+        </div>
 
-      console.log("BiblePage: loading translation_verses for translation", selectedTranslation.id, "verseIds", verseIds);
+        <div>
+          <label className="block text-sm mb-1">Translation</label>
+          <select
+            className="w-full rounded border px-3 py-2 text-sm"
+            value={selectedTranslationId ?? ""}
+            onChange={(e) => setSelectedTranslationId(Number(e.target.value))}
+          >
+            {data.translations.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.abbreviation} — {t.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
 
-      const { data: tv, error } = await supabase
-        .from("translation_verses")
-        .select("verse_id, text_content")
-        .eq("translation_id", selectedTranslation.id)
-        .in("verse_id", verseIds);
+      <div className="rounded border p-4 bg-card">
+        <h2 className="font-serif text-xl mb-1">
+          {book?.name} {selectedChapterNum}
+        </h2>
+        <p className="text-sm text-muted-foreground mb-3">
+          {translation?.abbreviation} {translation?.name}
+        </p>
 
-      console.log("BiblePage: translation_verses query result", { tv, error });
-
-      if (error) {
-        console.error("BiblePage: error loading translation_verses", error);
-        setError("Unable to load translation text. This may mean the translation text has not been imported yet.");
-        setLoading(false);
-        return;
-      }
-
-      const versesWithNums = await supabase
-        .from("verses")
-        .select("id, verse")
-        .in("id", verseIds);
-
-      console.log("BiblePage: versesWithNums query result", versesWithNums);
-
-      const map = new Map((versesWithNums.data || []).map((v: any) => [v.id, v.verse]));
-      const merged = (tv || []).map((t: any) => ({
-        verse_id: t.verse_id,
-        verse_number: map.get(t.verse_id) || 0,
-        text_content: t.text_content,
-      }));
-
-      console.log("BiblePage: merged translation verses", merged);
-
-      setTranslationVerses(merged.sort((a, b) => a.verse_number - b.verse_number));
-      setLoading(false);
-    } catch (e) {
-      console.error("BiblePage: unexpected error", e);
-      setError("Unexpected error loading Bible data.");
-      setLoading(false);
-    }
-  })();
-}, [selectedChapter, selectedTranslation]);
-
+        {!chapter ? (
+          <p className="text-sm text-muted-foreground">No chapter selected.</p>
+        ) : (
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">
+              This is a simple placeholder view using /api/test-bible-data.
+              Real verse text will be added next.
+            </p>
+            <p className="text-sm">
+              Showing: {book?.name} chapter {selectedChapterNum} (structure only).
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
