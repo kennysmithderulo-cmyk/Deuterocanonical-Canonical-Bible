@@ -28,20 +28,35 @@ export default function BiblePage() {
   useEffect(() => {
     (async () => {
       const { data: b, error: eb } = await supabase
-        .from("bible_books")
-        .select("id,name,testament,book_order,chapters_count")
-        .order("book_order");
+        .from("books")
+        .select("id, name, testament, order, chapters_count");
       const { data: t, error: et } = await supabase
         .from("translations")
-        .select("id,code,name");
+        .select("id, code, name");
+
       if (eb || et) {
         setError("Unable to load Bible data. Ensure migrations and seeds are applied.");
         return;
       }
-      setBooks(b || []);
-      setTranslations(t || []);
-      if (b && b.length > 0) setSelectedBook(b[0]);
-      if (t && t.length > 0) setSelectedTranslation(t[0]);
+
+      const booksMapped = (b || []).map((x: any) => ({
+        id: x.id,
+        name: x.name,
+        testament: x.testament,
+        book_order: (x as any).order ?? 0,
+        chapters_count: (x as any).chapters_count ?? 0,
+      }));
+
+      const translationsMapped = (t || []).map((x) => ({
+        id: x.id,
+        code: x.code ?? "TEST",
+        name: x.name,
+      }));
+
+      setBooks(booksMapped);
+      setTranslations(translationsMapped);
+      if (booksMapped.length > 0) setSelectedBook(booksMapped[0]);
+      if (translationsMapped.length > 0) setSelectedTranslation(translationsMapped[0]);
     })();
   }, []);
 
@@ -49,13 +64,20 @@ export default function BiblePage() {
     if (!selectedBook) return;
     (async () => {
       const { data, error } = await supabase
-        .from("bible_chapters")
-        .select("id,chapter_number")
+        .from("chapters")
+        .select("id, chapter")
         .eq("book_id", selectedBook.id)
-        .order("chapter_number");
+        .order("chapter");
+
       if (error) return;
-      setChapters(data || []);
-      if (data && data.length > 0) setSelectedChapter(data[0]);
+
+      const chaptersMapped = (data || []).map((x: any) => ({
+        id: x.id,
+        chapter_number: x.chapter,
+      }));
+
+      setChapters(chaptersMapped);
+      if (chaptersMapped.length > 0) setSelectedChapter(chaptersMapped[0]);
     })();
   }, [selectedBook]);
 
@@ -63,12 +85,19 @@ export default function BiblePage() {
     if (!selectedChapter) return;
     (async () => {
       const { data, error } = await supabase
-        .from("bible_verses")
-        .select("id,verse_number")
+        .from("verses")
+        .select("id, verse")
         .eq("chapter_id", selectedChapter.id)
-        .order("verse_number");
+        .order("verse");
+
       if (error) return;
-      setVerses(data || []);
+
+      const versesMapped = (data || []).map((x: any) => ({
+        id: x.id,
+        verse_number: x.verse,
+      }));
+
+      setVerses(versesMapped);
     })();
   }, [selectedChapter]);
 
@@ -78,30 +107,34 @@ export default function BiblePage() {
     setError(null);
     (async () => {
       const verseData = await supabase
-        .from("bible_verses")
+        .from("verses")
         .select("id")
         .eq("chapter_id", selectedChapter.id);
       const verseIds = (verseData.data || []).map((v) => v.id);
+
       if (verseIds.length === 0) {
         setTranslationVerses([]);
         setLoading(false);
         return;
       }
+
       const { data: tv, error } = await supabase
         .from("translation_verses")
-        .select("verse_id,text_content")
+        .select("verse_id, text_content")
         .eq("translation_id", selectedTranslation.id)
         .in("verse_id", verseIds);
+
       if (error) {
         setError("Unable to load translation text. This may mean the translation text has not been imported yet.");
         setLoading(false);
         return;
       }
+
       const versesWithNums = await supabase
-        .from("bible_verses")
-        .select("id,verse_number")
+        .from("verses")
+        .select("id, verse")
         .in("id", verseIds);
-      const map = new Map((versesWithNums.data || []).map((v) => [v.id, v.verse_number]));
+      const map = new Map((versesWithNums.data || []).map((v: any) => [v.id, v.verse]));
       const merged = (tv || []).map((t) => ({
         verse_id: t.verse_id,
         verse_number: map.get(t.verse_id) || 0,
