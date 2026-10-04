@@ -1,15 +1,9 @@
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseKey) {
-    return NextResponse.json(
-      { error: "Missing Supabase environment variables" },
-      { status: 500 }
-    );
-  }
+  // Hard-coded to the working Supabase project (debug only)
+  const supabaseUrl = "https://ylspdrjrvhixrregmqtg.supabase.co";
+  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlsc3BkcmpydmhpeHJyZWdtcXRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4MTY2MTgsImV4cCI6MjEwNDM5MjYxOH0.w-N4jnexSpu3r2x2vJdBv62tCg9xzsOyBLiYlFBaEn4";
 
   const res = await fetch(
     `${supabaseUrl}/rest/v1/rpc/get_bible_data_v3`,
