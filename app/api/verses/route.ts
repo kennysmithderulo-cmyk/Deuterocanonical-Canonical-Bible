@@ -6,8 +6,6 @@ export async function GET(request: Request) {
   const chapterId = searchParams.get("chapterId");
   const translationId = searchParams.get("translationId");
 
-  console.log("verses API called with", { chapterId, translationId });
-
   if (!chapterId || !translationId) {
     return NextResponse.json(
       { error: "Missing chapterId or translationId" },
@@ -18,18 +16,13 @@ export async function GET(request: Request) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  console.log("env check", {
-    supabaseUrl: !!supabaseUrl,
-    supabaseServiceRoleKey: !!supabaseServiceRoleKey,
-  });
-
   if (!supabaseUrl || !supabaseServiceRoleKey) {
-    console.error("Missing Supabase env vars", {
-      supabaseUrl,
-      supabaseServiceRoleKey: supabaseServiceRoleKey ? "[present]" : "[missing]",
-    });
     return NextResponse.json(
-      { error: "Missing Supabase env vars" },
+      {
+        error: "Missing Supabase env vars",
+        hasUrl: !!supabaseUrl,
+        hasKey: !!supabaseServiceRoleKey,
+      },
       { status: 500 }
     );
   }
@@ -43,16 +36,28 @@ export async function GET(request: Request) {
     .eq("chapter_id", Number(chapterId))
     .order("verse");
 
-  console.log("verses query result", {
-    data: versesRes.data,
-    error: versesRes.error,
-  });
+  if (versesRes.error) {
+    return NextResponse.json(
+      {
+        error: "Failed to fetch verses",
+        details: versesRes.error.message,
+      },
+      { status: 500 }
+    );
+  }
 
   const verses = versesRes.data || [];
 
   if (verses.length === 0) {
-    console.log("No verses found for chapter", chapterId);
-    return NextResponse.json({ verses: [], texts: [] });
+    return NextResponse.json(
+      {
+        message: "No verses found for this chapter",
+        chapterId,
+        verses: [],
+        texts: [],
+      },
+      { status: 200 }
+    );
   }
 
   const verseIds = verses.map((v: any) => v.id);
@@ -68,10 +73,15 @@ export async function GET(request: Request) {
     .eq("translation_id", Number(translationId))
     .in("verse_id", verseIds);
 
-  console.log("translation_verses query result", {
-    data: tvRes.data,
-    error: tvRes.error,
-  });
+  if (tvRes.error) {
+    return NextResponse.json(
+      {
+        error: "Failed to fetch translation text",
+        details: tvRes.error.message,
+      },
+      { status: 500 }
+    );
+  }
 
   const tvData = tvRes.data || [];
 
@@ -82,8 +92,6 @@ export async function GET(request: Request) {
       text_content: t.text_content,
     }))
     .sort((a, b) => a.verse_number - b.verse_number);
-
-  console.log("returning", { versesCount: verses.length, textsCount: texts.length });
 
   return NextResponse.json({ verses, texts });
 }
