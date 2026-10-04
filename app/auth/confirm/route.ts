@@ -21,7 +21,8 @@ export async function GET(request: NextRequest) {
 
   if (!error) {
     // Optionally, you can do additional post-verification logic here
-    redirect(`/${next.replace(/^//, "")}`);
+    const cleanedNext = next.startsWith("/") ? next.slice(1) : next;
+    redirect(`/${cleanedNext}`);
   }
 
   // If verification failed, redirect to a failure page or home
