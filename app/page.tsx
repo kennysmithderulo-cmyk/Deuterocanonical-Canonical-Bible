@@ -13,12 +13,12 @@ export default function HomePage() {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button asChild size="lg">
-            <Link href="/bible">Read Bible</Link>
-          </Button>
-          <Button asChild variant="outline" size="lg">
-            <Link href="/library">Library</Link>
-          </Button>
+          <Link href="/bible">
+            <Button size="lg">Read Bible</Button>
+          </Link>
+          <Link href="/library">
+            <Button variant="outline" size="lg">Library</Button>
+          </Link>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-8 text-left">
