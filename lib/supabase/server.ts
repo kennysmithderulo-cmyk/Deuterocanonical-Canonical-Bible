@@ -12,8 +12,8 @@ export function createSupabaseServerClient() {
     // Return a minimal object that won't crash during build
     return {
       auth: {
-        getUser: async () => ({ data: { user: null }, error: null }),
-        getSession: async () => ({ data: { session: null }, error: null }),
+        getUser: async () => ({ data: { user: null } as { user: null }, error: null }),
+        getSession: async () => ({ data: { session: null } as { session: null }, error: null }),
       },
       from: () => ({
         select: () => ({
