@@ -1,4 +1,13 @@
-import { NextResponse } from "next/server";
+
+# Paste the full code I provided above, then save and exit: Ctrl+O, Enter, Ctrl+X
+
+# Check what changed
+git diff app/api/verses/route.ts
+
+# If it looks correct, commit and push
+git add app/api/verses/route.ts
+git commit -m "Use custom env var in verses API to avoid team-level override"
+git push origin mainimport { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 export async function GET(request: Request) {
