@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 export default function AboutPage() {
   return (
     <div className="max-w-3xl mx-auto">
@@ -7,4 +9,4 @@ export default function AboutPage() {
       </p>
     </div>
   );
-}export const dynamic = 'force-dynamic';
+}
