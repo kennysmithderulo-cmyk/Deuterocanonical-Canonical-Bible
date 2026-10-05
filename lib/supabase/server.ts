@@ -4,7 +4,11 @@ import { cookies } from "next/headers";
 export function createSupabaseServerClient() {
   const cookieStore = cookies();
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  // Use custom env var to avoid team-level override
+  const url =
+    process.env.NEXT_PUBLIC_SUPABASE_URL_CUSTOM ||
+    process.env.NEXT_PUBLIC_SUPABASE_URL;
+
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   // During build/static generation, these may be undefined; return a dummy client
