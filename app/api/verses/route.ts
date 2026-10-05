@@ -27,6 +27,8 @@ export async function GET(request: Request) {
         hasUrl: !!supabaseUrl,
         hasKey: !!supabaseServiceRoleKey,
         urlValue: supabaseUrl,
+        customUrlValue: process.env.NEXT_PUBLIC_SUPABASE_URL_CUSTOM,
+        standardUrlValue: process.env.NEXT_PUBLIC_SUPABASE_URL,
       },
       { status: 500 }
     );
@@ -47,6 +49,7 @@ export async function GET(request: Request) {
         error: "Failed to fetch verses",
         details: versesRes.error.message,
         url: supabaseUrl,
+        code: versesRes.error.code,
       },
       { status: 500 }
     );
@@ -85,6 +88,7 @@ export async function GET(request: Request) {
         error: "Failed to fetch translation text",
         details: tvRes.error.message,
         url: supabaseUrl,
+        code: tvRes.error.code,
       },
       { status: 500 }
     );
@@ -102,3 +106,4 @@ export async function GET(request: Request) {
 
   return NextResponse.json({ verses, texts });
 }
+
