@@ -12,4 +12,4 @@ export default function AdminPage() {
       </div>
     </div>
   );
-}
+}export const dynamic = 'force-dynamic';

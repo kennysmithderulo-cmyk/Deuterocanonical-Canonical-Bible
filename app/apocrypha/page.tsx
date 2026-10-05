@@ -112,4 +112,4 @@ export default function ApocryphaPage() {
       </p>
     </div>
   );
-}
+}export const dynamic = 'force-dynamic';

@@ -7,4 +7,4 @@ export default function TermsPage() {
       </p>
     </div>
   );
-}
+}export const dynamic = 'force-dynamic';
