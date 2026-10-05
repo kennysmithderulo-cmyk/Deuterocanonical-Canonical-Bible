@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
 export async function GET() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  // Use custom env var to avoid team-level override
+  const supabaseUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL_CUSTOM ||
+    process.env.NEXT_PUBLIC_SUPABASE_URL;
+
   const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !supabaseServiceRoleKey) {
