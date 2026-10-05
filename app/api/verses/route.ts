@@ -13,7 +13,11 @@ export async function GET(request: Request) {
     );
   }
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  // Use custom env var to avoid team-level override
+  const supabaseUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL_CUSTOM ||
+    process.env.NEXT_PUBLIC_SUPABASE_URL;
+
   const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !supabaseServiceRoleKey) {
@@ -22,6 +26,7 @@ export async function GET(request: Request) {
         error: "Missing Supabase env vars",
         hasUrl: !!supabaseUrl,
         hasKey: !!supabaseServiceRoleKey,
+        urlValue: supabaseUrl,
       },
       { status: 500 }
     );
@@ -41,6 +46,7 @@ export async function GET(request: Request) {
       {
         error: "Failed to fetch verses",
         details: versesRes.error.message,
+        url: supabaseUrl,
       },
       { status: 500 }
     );
@@ -78,6 +84,7 @@ export async function GET(request: Request) {
       {
         error: "Failed to fetch translation text",
         details: tvRes.error.message,
+        url: supabaseUrl,
       },
       { status: 500 }
     );
