@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 export default function LicensingPage() {
   return (
     <div className="max-w-4xl mx-auto">
